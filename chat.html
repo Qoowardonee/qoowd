@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="stylesheet" href="css/chat.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Чат QWD</title>
+
+</head>
+<body>  
+    <div class="linia">
+        <label class="side-button-1" for="side-checkbox">
+                <div id="vb1" class="side-b side-open"><img src="img/icon/arrowleftwm.png" width="50"></div>
+                <div class="side-b side-close"><img src="img/icon/arrowleftwm.png" width="50"></div>
+        </label>
+    </div>
+<input type="checkbox" id="side-checkbox" />
+      <div class="side-panel">
+          <label class="side-button-2" for="side-checkbox">+</label>    
+      <a href="index.html"><div class="side-title"><img src="img/icon/menuwm.png" width="100"></div></a>
+        <p>
+          <a href="main.html">
+            <img src="img/icon/mainmalin.png" width="100">
+          </a>
+        </p>
+        <p>
+          <a href="clock.html"><img src="img/icon/clock.png" width="100"></a>
+        </p>
+        <p>
+          <a href="profile.html"><img src="img/icon/profil.png" width="100"></a>
+        </p>
+      </div>
+    <div class="side-button-1-wr">
+    </div>
+   	    <div class="fon_osnova">
+            <style>
+                body {
+                background-image: url(img/fontwo/qwdwmb.jpg);
+                -moz-background-size: 100%;
+                -webkit-background-size: 100%;
+                -o-background-size: 100%;
+                background-size: 100%;
+                background-attachment: fixed;
+            }
+            </style>
+        </div>
+
+    <!-- Îñíîâíàÿ ÷àñòü ñòðàíèöû -->
+    <div class="container">
+        <div class="py-5 text-center">
+            <h2></h2>
+            <p class="lead"></p>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <!-- Ôîðìà äëÿ ïîëó÷åíèÿ ñîîáùåíèé è èìåíè -->
+                <h3>Message form</h3>
+                <form id="messForm">
+                    <label for="name">Name</label>
+                    <input type="text" name="name" id="name" placeholder="Enter a name" class="form-control">
+                    <br>
+                    <label for="message">сообщение</label>
+                    <textarea name="message" id="message" class="form-control" placeholder="Enter a message"></textarea>
+                    <br>
+                    <input type="submit" value="To send" class="btn btn-danger">
+                </form>
+            </div>
+            <div class="col-6">
+                <h3>Message</h3>
+                <!-- Âûâîä âñåõ ñîîáùåíèé áóäåò çäåñü -->
+                <div id="all_mess"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Ïîäêëþ÷àåì jQuery, à òàêæå Socket.io -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Ó êàæäîãî ïîëüçîâàòåëÿ áóäåò ñëó÷àéíûé ñòèëü äëÿ áëîêà ñ ñîîáùåíÿìè,
+        // ïîýòîìó â ýòîì êóñî÷êå êîäà ìû ïîëó÷àåì ñëó÷àéíûå ÷èñëà
+        var min = 1;
+        var max = 6;
+        var random = Math.floor(Math.random() * (max - min)) + min;
+
+        // Óñòàíàëèâàåì êëàññ â ïåðåìåííóþ â çàâèñèìîñòè îò ñëó÷àéíîãî ÷èñëà
+        // Ýòè êëàññû âçÿòû èç Bootstrap ñòèëåé
+        var alertClass;
+        switch (random) {
+            case 1:
+                alertClass = 'secondary';
+                break;
+            case 2:
+                alertClass = 'danger';
+                break;
+            case 3:
+                alertClass = 'success';
+                break;
+            case 4:
+                alertClass = 'warning';
+                break;
+            case 5:
+                alertClass = 'info';
+                break;
+            case 6:
+                alertClass = 'light';
+                break;
+        }
+
+        // Ôóíêöèÿ äëÿ ðàáîòû ñ äàííûìè íà ñàéòå
+        $(function () {
+            // Âêëþ÷àåì socket.io è îòñëåæèâàåì âñå ïîäêëþ÷åíèÿ
+            var socket = io.connect();
+            // Äåëàåì ïåðåìåííûå íà:
+            var $form = $("#messForm"); // Ôîðìó ñîîáùåíèé
+            var $name = $("#name"); // Ïîëå ñ èìåíåì
+            var $textarea = $("#message"); // Òåêñòîâîå ïîëå
+            var $all_messages = $("#all_mess"); // Áëîê ñ ñîîáùåíèÿìè
+
+            // Îòñëåæèâàåì íàæàòèå íà êíîïêó â ôîðìå ñîîáùåíèé
+            $form.submit(function (event) {
+                // Ïðåäîòâðàùàåì êëàññè÷åñêîå ïîâåäåíèå ôîðìû
+                event.preventDefault();
+                // Â ñîêåò îòñûëàåì íîâîå ñîáûòèå 'send mess',
+                // â ñîáûòèå ïåðåäàåì ðàçëè÷íûå ïàðàìåòðû è äàííûå
+                socket.emit('send mess', { mess: $textarea.val(), name: $name.val(), className: alertClass });
+                // Î÷èùàåì ïîëå ñ ñîîáùåíèåì
+                $textarea.val('');
+            });
+
+            // Çäåñü îòñëåæèâàåì ñîáûòèå 'add mess',
+            // êîòîðîå äîëæíî ïðèõîäèòü èç ñîêåòà â ñëó÷àå äîáàâëåíèÿ íîâîãî ñîîáùåíèÿ
+            socket.on('add mess', function (data) {
+                // Âñòðàèâàåì ïîëó÷åííîå ñîîáùåíèå â áëîê ñ ñîîáùåíèÿìè
+                // Ó áëîêà ñ ñîîáùåíèåì áóäåò òîò êëàññ, êîòîðûé ñîîòâåòâóåò ïîëüçîâàòåëþ ÷òî åãî îòïðàâèë
+                $all_messages.append("<div class='alert alert-" + data.className + "'><b>" + data.name + "</b>: " + data.mess + "</div>");
+            });
+
+        });
+    </script>
+    <div class="linia2">
+        QOOWARDONEE.WORLD DREAM &copy; 2021 | v3.0
+    </div>
+    <script src="js/fon.js"></script>
+</body>
+</html>
